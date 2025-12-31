@@ -14,7 +14,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.96);
             z-index: 9999;
             display: none;
             align-items: center;
@@ -27,33 +27,32 @@
         .browser-overlay.show { display: flex; }
 
         .browser-overlay h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
             color: #ff8fab;
+            font-weight: 600;
         }
 
         .browser-overlay p {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 30px;
-            max-width: 400px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 15px;
+            max-width: 350px;
         }
 
         .browser-overlay .icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
         }
 
-        .browser-overlay button {
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
+        .browser-overlay .instructions {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
         }
 
         body {
@@ -61,22 +60,45 @@
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             user-select: none;
+            padding: 20px 10px;
         }
 
-        #container { text-align: center; position: relative; z-index: 10; }
+        #container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        /* Beautiful Face */
+        /* Beautiful Face - Responsive */
         .face-container {
             position: relative;
             width: 280px;
             height: 340px;
-            margin: 0 auto 20px;
-            transform: scale(0.75);
+            margin: 0 auto 15px;
+            transform: scale(0.7);
+            transform-origin: center;
+        }
+
+        @media (min-width: 768px) {
+            .face-container {
+                transform: scale(0.85);
+            }
+        }
+
+        @media (min-height: 700px) {
+            .face-container {
+                transform: scale(0.8);
+            }
         }
 
         .hair-back {
@@ -288,17 +310,29 @@
             100% { height: 17px; }
         }
 
-        /* Chat */
+        /* Chat - Responsive */
         .messages {
-            width: 90%;
-            max-width: 400px;
-            height: 140px;
-            margin: 0 auto 15px;
+            width: 100%;
+            max-width: 450px;
+            height: 120px;
+            margin: 0 auto 12px;
             display: flex;
             flex-direction: column;
             gap: 6px;
             overflow-y: auto;
             padding: 8px;
+        }
+
+        @media (min-height: 700px) {
+            .messages {
+                height: 160px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .messages {
+                max-width: 500px;
+            }
         }
 
         .message {
@@ -381,11 +415,17 @@
         }
 
         .name {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: #ff8fab;
             margin-bottom: 8px;
             letter-spacing: 1px;
+        }
+
+        @media (min-width: 768px) {
+            .name {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
