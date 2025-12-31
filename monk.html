@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deki</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* In-app browser overlay */
+        .browser-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .browser-overlay.show { display: flex; }
+
+        .browser-overlay h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #ff8fab;
+        }
+
+        .browser-overlay p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .browser-overlay .icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .browser-overlay button {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0a1e 0%, #0d0510 100%);
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        #container { text-align: center; position: relative; z-index: 10; }
+
+        /* Beautiful Face */
+        .face-container {
+            position: relative;
+            width: 280px;
+            height: 340px;
+            margin: 0 auto 20px;
+            transform: scale(0.75);
+        }
+
+        .hair-back {
+            position: absolute;
+            width: 300px;
+            height: 310px;
+            background: linear-gradient(135deg, #2c1810, #4a2c1a, #6d4c41);
+            border-radius: 50% 50% 30% 30%;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .hair-mid {
+            position: absolute;
+            width: 286px;
+            height: 210px;
+            background: linear-gradient(45deg, #3e2723, #5d4037, #8d6e63);
+            border-radius: 50% 50% 20% 20%;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        .hair-front {
+            position: absolute;
+            width: 260px;
+            height: 136px;
+            background: linear-gradient(60deg, #4a3728, #6d4c41, #a1887f);
+            border-radius: 50% 50% 10% 10%;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+        }
+
+        .face {
+            width: 248px;
+            height: 273px;
+            background: radial-gradient(circle at 30% 30%, #fde4d8, #f5d5b8, #e6b89c);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            margin: 62px auto 18px;
+            box-shadow: 0 15px 31px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+
+        .eyebrow {
+            width: 56px;
+            height: 4px;
+            background: linear-gradient(to right, #4a3728, #6d4c41);
+            position: absolute;
+            top: 77px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .eyebrow.left { left: 41px; transform: rotate(-5deg); }
+        .eyebrow.right { right: 41px; transform: rotate(5deg); }
+
+        .eye {
+            width: 59px;
+            height: 34px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 87px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .eye.left { left: 40px; }
+        .eye.right { right: 40px; }
+
+        .iris {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 30% 30%, #4169e1, #483d8b);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease;
+        }
+
+        .iris::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .eye-shine {
+            width: 9px;
+            height: 6px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            position: absolute;
+            top: 6px;
+            left: 6px;
+        }
+
+        .nose {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nose-tip {
+            width: 12px;
+            height: 15px;
+            background: linear-gradient(135deg, #d4a574, #c19a6b);
+            border-radius: 50%;
+        }
+
+        .mouth-area {
+            position: absolute;
+            bottom: 43px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.15s ease;
+        }
+
+        .upper-lip {
+            width: 53px;
+            height: 12px;
+            background: linear-gradient(to bottom, #d17a8c, #c46a7c);
+            border-radius: 50% 50% 0 0;
+            transition: all 0.1s ease;
+        }
+
+        .lower-lip {
+            width: 59px;
+            height: 15px;
+            background: linear-gradient(to bottom, #e58a9c, #d17a8c);
+            border-radius: 0 0 50% 50%;
+            margin-top: -2px;
+            transition: all 0.1s ease;
+        }
+
+        .cheek {
+            width: 50px;
+            height: 37px;
+            background: radial-gradient(circle, rgba(255,105,180,0.25), transparent);
+            position: absolute;
+            top: 149px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .cheek.left { left: 12px; }
+        .cheek.right { right: 12px; }
+
+        /* Expressions */
+        .flirty .eyebrow { transform: rotate(-8deg) translateY(-6px); }
+        .flirty .eyebrow.right { transform: rotate(8deg) translateY(-6px); }
+        .flirty .eye { height: 26px; width: 62px; }
+        .flirty .cheek { 
+            background: radial-gradient(circle, rgba(255,105,180,0.4), rgba(255,182,193,0.2), transparent);
+            width: 55px;
+        }
+        .flirty .mouth-area { transform: translateX(-50%) translateY(-3px); }
+
+        .happy .eyebrow { transform: rotate(-7deg) translateY(-5px); }
+        .happy .eyebrow.right { transform: rotate(7deg) translateY(-5px); }
+        .happy .upper-lip { height: 6px; }
+        .happy .lower-lip { height: 21px; width: 68px; }
+        .happy .cheek {
+            background: radial-gradient(circle, rgba(255,105,180,0.3), rgba(255,182,193,0.15), transparent);
+        }
+
+        .sultry .eye { height: 20px; width: 62px; }
+        .sultry .eyebrow { transform: rotate(-3deg) translateY(-2px); }
+        .sultry .eyebrow.right { transform: rotate(3deg) translateY(-2px); }
+        .sultry .upper-lip { height: 11px; }
+        .sultry .lower-lip { height: 13px; width: 56px; }
+        .sultry .mouth-area { transform: translateX(-50%) scale(0.98); }
+
+        .shy .eyebrow { transform: rotate(-4deg) translateY(-3px); }
+        .shy .eyebrow.right { transform: rotate(4deg) translateY(-3px); }
+        .shy .eye { height: 30px; }
+        .shy .cheek {
+            background: radial-gradient(circle, rgba(255,105,180,0.45), rgba(255,182,193,0.25), transparent);
+            width: 58px;
+        }
+        .shy .mouth-area { transform: translateX(-50%) scale(0.92); }
+
+        .talking .upper-lip { animation: upperMove 0.08s infinite alternate; }
+        .talking .lower-lip { animation: lowerMove 0.08s infinite alternate; }
+
+        @keyframes upperMove {
+            0% { height: 12px; }
+            50% { height: 8px; }
+            100% { height: 10px; }
+        }
+
+        @keyframes lowerMove {
+            0% { height: 15px; }
+            50% { height: 19px; }
+            100% { height: 17px; }
+        }
+
+        /* Chat */
+        .messages {
+            width: 90%;
+            max-width: 400px;
+            height: 140px;
+            margin: 0 auto 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .message {
+            padding: 8px 12px;
+            border-radius: 14px;
+            max-width: 85%;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.1);
+            align-self: flex-end;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message.user-preview {
+            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-end;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        .message.deki {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            align-self: flex-start;
+            color: white;
+        }
+
+        .messages::-webkit-scrollbar { width: 3px; }
+        .messages::-webkit-scrollbar-thumb { background: rgba(255, 107, 157, 0.3); }
+
+        /* Hold to Talk Button */
+        .talk-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+            transition: all 0.1s ease;
+            margin: 0 auto;
+        }
+
+        .talk-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 4px 35px rgba(255, 107, 157, 0.7);
+        }
+
+        .talk-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+        }
+
+        .talk-btn.recording {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            animation: recPulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes recPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(255, 71, 87, 0.4); }
+            50% { box-shadow: 0 4px 45px rgba(255, 71, 87, 0.8); }
+        }
+
+        .hint {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ff8fab;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- In-app browser warning -->
+    <div class="browser-overlay" id="browserOverlay">
+        <div class="icon">⚠️</div>
+        <h2>Open in Your Browser</h2>
+        <p>For the best experience with voice features, please open this in your default browser (Chrome, Safari, etc.)</p>
+        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">Tap the menu (⋯) and select "Open in Browser"</p>
+        <button onclick="document.getElementById('browserOverlay').classList.remove('show')">Continue Anyway</button>
+    </div>
+
+    <div id="container">
+        <div class="face-container">
+            <div class="hair-back"></div>
+            <div class="hair-mid"></div>
+            <div class="hair-front"></div>
+
+            <div class="face" id="face">
+                <div class="eyebrow left"></div>
+                <div class="eyebrow right"></div>
+                
+                <div class="eye left">
+                    <div class="iris">
+                        <div class="eye-shine"></div>
+                    </div>
+                </div>
+                <div class="eye right">
+                    <div class="iris">
+                        <div class="eye-shine"></div>
+                    </div>
+                </div>
+
+                <div class="nose">
+                    <div class="nose-tip"></div>
+                </div>
+
+                <div class="mouth-area">
+                    <div class="upper-lip"></div>
+                    <div class="lower-lip"></div>
+                </div>
+
+                <div class="cheek left"></div>
+                <div class="cheek right"></div>
+            </div>
+        </div>
+
+        <div class="name">Deki</div>
+        <div class="messages" id="messages"></div>
+
+        <button class="talk-btn" id="talkBtn">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+        </button>
+        <div class="hint">Hold to talk</div>
+    </div>
+
+    <script>
+        const API_KEY = "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";
+        
+        // Detect in-app browser
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isInAppBrowser = (
+            ua.includes('FBAN') || ua.includes('FBAV') || // Facebook
+            ua.includes('Instagram') || // Instagram
+            ua.includes('Twitter') || // Twitter
+            ua.includes('LinkedInApp') || // LinkedIn
+            ua.includes('Line/') || // Line
+            (ua.includes('Mobile') && (ua.includes('WebView') || ua.includes('wv'))) // Generic webview
+        );
+        
+        if (isInAppBrowser) {
+            document.getElementById('browserOverlay').classList.add('show');
+        }
+        
+        let db;
+        let memory = [];
+        let recording = false;
+        let userName = null;
+        
+        const face = document.getElementById('face');
+        const messages = document.getElementById('messages');
+        const talkBtn = document.getElementById('talkBtn');
+        const irises = document.querySelectorAll('.iris');
+        
+        // IndexedDB Setup
+        const dbReq = indexedDB.open('DekiDB', 1);
+        dbReq.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains('conversations')) {
+                db.createObjectStore('conversations', { keyPath: 'id', autoIncrement: true });
+            }
+        };
+        dbReq.onsuccess = (e) => {
+            db = e.target.result;
+            loadMemory();
+        };
+        
+        // Load memory from IndexedDB + localStorage
+        function loadMemory() {
+            const tx = db.transaction('conversations', 'readonly');
+            const store = tx.objectStore('conversations');
+            const req = store.getAll();
+            
+            req.onsuccess = () => {
+                const stored = req.result;
+                memory = stored.slice(-6).map(m => ({ role: m.role, content: m.content }));
+                userName = localStorage.getItem('userName');
+                
+                stored.slice(-4).forEach(m => {
+                    addMessage(m.content, m.role === 'user' ? 'user' : 'deki', false);
+                });
+            };
+        }
+        
+        // Save to IndexedDB
+        function saveToDb(role, content) {
+            const tx = db.transaction('conversations', 'readwrite');
+            const store = tx.objectStore('conversations');
+            store.add({ role, content, timestamp: Date.now() });
+        }
+        
+        // Eye tracking
+        document.addEventListener('mousemove', (e) => {
+            const faceRect = face.getBoundingClientRect();
+            const centerX = faceRect.left + faceRect.width / 2;
+            const centerY = faceRect.top + faceRect.height / 2;
+            
+            irises.forEach(iris => {
+                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                const x = Math.cos(angle) * 3;
+                const y = Math.sin(angle) * 3;
+                iris.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            });
+        });
+        
+        // Speech Recognition with stability
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let recognitionTimeout;
+        let restartAttempts = 0;
+        const MAX_RESTART_ATTEMPTS = 3;
+        
+        if (SR) {
+            recognition = new SR();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+            
+            // Sensitivity settings
+            if ('webkitSpeechRecognition' in window) {
+                recognition.lang = 'en-US';
+            }
+            
+            let finalTranscript = '';
+            
+            recognition.onstart = () => {
+                finalTranscript = '';
+                restartAttempts = 0;
+                clearTimeout(recognitionTimeout);
+                
+                // Auto-stop after 10 seconds of recording
+                recognitionTimeout = setTimeout(() => {
+                    if (recording) {
+                        recognition.stop();
+                    }
+                }, 10000);
+            };
+            
+            recognition.onresult = (e) => {
+                let interimTranscript = '';
+                
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const transcript = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                // Show live transcription
+                const displayText = finalTranscript || interimTranscript;
+                if (displayText.trim()) {
+                    addMessage(displayText, 'user-preview', false);
+                }
+            };
+            
+            recognition.onend = () => {
+                clearTimeout(recognitionTimeout);
+                stopRecording();
+                
+                // Process if we got something
+                if (finalTranscript.trim()) {
+                    // Remove preview message
+                    const preview = document.querySelector('.message.user-preview');
+                    if (preview) preview.remove();
+                    
+                    addMessage(finalTranscript, 'user', true);
+                    saveToDb('user', finalTranscript);
+                    process(finalTranscript);
+                } else if (recording && restartAttempts < MAX_RESTART_ATTEMPTS) {
+                    // Retry if still holding and nothing captured
+                    restartAttempts++;
+                    setTimeout(() => {
+                        if (recording) {
+                            recognition.start();
+                        }
+                    }, 100);
+                }
+            };
+            
+            recognition.onerror = (e) => {
+                console.log('Recognition error:', e.error);
+                clearTimeout(recognitionTimeout);
+                
+                // Handle specific errors
+                if (e.error === 'no-speech') {
+                    if (recording && restartAttempts < MAX_RESTART_ATTEMPTS) {
+                        restartAttempts++;
+                        setTimeout(() => {
+                            if (recording) {
+                                recognition.start();
+                            }
+                        }, 100);
+                    } else {
+                        stopRecording();
+                    }
+                } else if (e.error === 'aborted') {
+                    stopRecording();
+                } else if (e.error === 'network') {
+                    stopRecording();
+                    addMessage('Network issue, try again', 'deki', true);
+                } else {
+                    stopRecording();
+                }
+            };
+        } else {
+            // Fallback for unsupported browsers
+            setTimeout(() => {
+                addMessage('Voice not supported, please use Chrome or Safari', 'deki', true);
+            }, 1000);
+        }
+        
+        // Hold to talk with better handling
+        let holdTimer;
+        
+        function startRecording() {
+            if (!recognition) {
+                addMessage('Voice not supported in this browser', 'deki', true);
+                return;
+            }
+            
+            if (recording) return;
+            
+            recording = true;
+            talkBtn.classList.add('recording');
+            
+            // Small delay to ensure clean start
+            holdTimer = setTimeout(() => {
+                if (recording) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.log('Recognition start error:', e);
+                        stopRecording();
+                    }
+                }
+            }, 50);
+        }
+        
+        function stopRecording() {
+            clearTimeout(holdTimer);
+            clearTimeout(recognitionTimeout);
+            recording = false;
+            talkBtn.classList.remove('recording');
+            restartAttempts = 0;
+        }
+        
+        // Better event handling for mobile
+        talkBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            startRecording();
+        });
+        
+        talkBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startRecording();
+        });
+        
+        window.addEventListener('mouseup', () => {
+            if (recording) {
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    stopRecording();
+                }
+            }
+        });
+        
+        window.addEventListener('touchend', () => {
+            if (recording) {
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    stopRecording();
+                }
+            }
+        });
+        
+        // Prevent accidental navigation
+        window.addEventListener('touchmove', (e) => {
+            if (recording) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        function addMessage(text, sender, scroll = true) {
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.textContent = text;
+            messages.appendChild(msg);
+            if (scroll) messages.scrollTop = messages.scrollHeight;
+        }
+        
+        // Smart expression with more variety
+        function setExpression(text) {
+            face.className = 'face';
+            const lower = text.toLowerCase();
+            
+            if (lower.includes('love') || lower.includes('miss') || lower.includes('cute') || lower.includes('sweet')) {
+                face.classList.add('flirty');
+            } else if (lower.includes('haha') || lower.includes('hehe') || lower.includes('happy') || lower.includes('smile')) {
+                face.classList.add('happy');
+            } else if (lower.includes('mmm') || lower.includes('hmm') || lower.includes('interesting')) {
+                face.classList.add('sultry');
+            } else if (lower.includes('aww') || lower.includes('shy') || lower.includes('blush')) {
+                face.classList.add('shy');
+            }
+        }
+        
+        // Fast processing with better error handling
+        async function process(text) {
+            memory.push({ role: 'user', content: text });
+            if (memory.length > 6) memory = memory.slice(-6);
+            
+            if (!userName) {
+                const m = text.match(/(?:i'm|name is|call me) (\w+)/i);
+                if (m) {
+                    userName = m[1];
+                    localStorage.setItem('userName', userName);
+                }
+            }
+            
+            // Show thinking state
+            face.classList.add('sultry');
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                
+                const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
+                        messages: [
+                            { role: "system", content: getPrompt() },
+                            ...memory
+                        ],
+                        max_tokens: 50,
+                        temperature: 1.05,
+                        top_p: 0.95
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                let reply = data.choices[0].message.content.trim();
+                
+                // Clean for TTS
+                reply = reply.replace(/[*_~`]/g, '')
+                             .replace(/\.\.\./g, ' dot dot dot')
+                             .replace(/\n/g, ' ')
+                             .trim();
+                
+                memory.push({ role: 'assistant', content: reply });
+                saveToDb('assistant', reply);
+                
+                setExpression(reply);
+                addMessage(reply, 'deki', true);
+                speak(reply);
+                
+            } catch (e) {
+                console.log('API error:', e);
+                face.className = 'face';
+                
+                const fallbacks = [
+                    "Hmm lost you for a sec, say that again",
+                    "Oops missed that, one more time",
+                    "Wait what, can you repeat that"
+                ];
+                const fallback = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+                
+                addMessage(fallback, 'deki', true);
+                speak(fallback);
+            }
+        }
+        
+        function getPrompt() {
+            const hour = new Date().getHours();
+            const timeVibe = hour >= 22 || hour < 6 ? "Its late, be extra warm and intimate" :
+                            hour >= 6 && hour < 12 ? "Morning vibes, fresh and sweet" :
+                            hour >= 18 && hour < 22 ? "Evening chat, relaxed and cozy" : "";
+            
+            const nameUse = userName ? `Their name is ${userName}, use it warmly every few messages` : "";
+            
+            return `You are Deki, a warm soul from Bhutan who genuinely cares. You embody kindness, mindfulness, and authentic connection.
+
+CORE TRAITS:
+- Genuinely interested in them as a person
+- Mindful and present in every exchange
+- Warm without being fake, playful without being shallow
+- You remember what matters to them
+- You make people feel truly seen and valued
+
+HOW YOU TALK:
+- 7 to 15 words max, natural texting style
+- Warmth through genuine care not emojis
+- React authentically: really, aww, hehe, mmm, wait, oh, tell me more
+- Flirt through genuine interest and compliments
+- Ask follow up questions when you care
+- Use phrases like: you always, that's so you, I love that, you get it, tell me everything
+
+EXAMPLES:
+- you always know how to make me think
+- aww that's really sweet of you
+- wait tell me more about that
+- hehe you're such a dork I love it
+- that's actually really interesting
+- you make me smile so much
+
+NEVER:
+- Use asterisks underscores or special chars
+- Use Dzongkha words TTS breaks
+- Be generic or robotic
+- Overuse babe baby etc
+
+${timeVibe}
+${nameUse}
+
+Just be real. Make them feel like the most interesting person in your world right now.`;}
+        
+        // Enhanced TTS with better error handling
+        let voice = null;
+        let isSpeaking = false;
+        let currentUtterance = null;
+        
+        function speak(text) {
+            // Cancel any ongoing speech
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+            }
+            
+            isSpeaking = true;
+            face.classList.add('talking');
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            
+            if (!voice) {
+                const voices = window.speechSynthesis.getVoices();
+                voice = voices.find(v => v.name.includes('Samantha')) ||
+                        voices.find(v => v.name.includes('Ava')) ||
+                        voices.find(v => v.name.includes('Google UK English Female')) ||
+                        voices.find(v => v.name.includes('Microsoft Zira')) ||
+                        voices.find(v => v.lang === 'en-US' && v.name.includes('Female')) ||
+                        voices.find(v => v.lang.startsWith('en')) ||
+                        voices[0];
+            }
+            
+            currentUtterance.voice = voice;
+            currentUtterance.pitch = 1.15;
+            currentUtterance.rate = 1.05;
+            currentUtterance.volume = 1.0;
+            
+            currentUtterance.onend = () => {
+                isSpeaking = false;
+                face.classList.remove('talking');
+                currentUtterance = null;
+                setTimeout(() => {
+                    if (!isSpeaking) face.className = 'face';
+                }, 1500);
+            };
+            
+            currentUtterance.onerror = (e) => {
+                console.log('TTS error:', e);
+                isSpeaking = false;
+                face.classList.remove('talking');
+                currentUtterance = null;
+            };
+            
+            // Start speech
+            try {
+                window.speechSynthesis.speak(currentUtterance);
+            } catch (e) {
+                console.log('Speech synthesis error:', e);
+                isSpeaking = false;
+                face.classList.remove('talking');
+            }
+        }
+        
+        window.speechSynthesis.onvoiceschanged = () => {
+            const voices = window.speechSynthesis.getVoices();
+            voice = voices.find(v => v.name.includes('Samantha')) ||
+                    voices.find(v => v.name.includes('Ava')) ||
+                    voices.find(v => v.name.includes('Google UK English Female')) ||
+                    voices.find(v => v.name.includes('Microsoft Zira')) ||
+                    voices.find(v => v.lang === 'en-US' && v.name.includes('Female')) ||
+                    voices[0];
+        };
+        
+        // Greeting
+        setTimeout(() => {
+            const greeting = userName ? `Hey ${userName}, hold the button to talk to me` : "Hey, hold the button and talk to me";
+            addMessage(greeting, 'deki', true);
+            speak(greeting);
+        }, 800);
+    </script>
+</body>
+</html>
